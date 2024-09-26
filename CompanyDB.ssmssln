@@ -1,19 +1,64 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# SQL Server Management Studio Solution File, Format Version 19.00
-VisualStudioVersion = 15.0.28307.421
-MinimumVisualStudioVersion = 10.0.40219.1
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Default|Default = Default|Default
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1762091B-7F4F-467C-BAD4-4CD5BF4D6415}.Default|Default.ActiveCfg = Default
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {BFAE7CB5-D44E-4227-B1B6-EA8661D11B22}
-	EndGlobalSection
-EndGlobal
+-- 1. Get employees from the IT department
+SELECT first_name, last_name 
+FROM employees
+WHERE department_id = (SELECT department_id FROM departments WHERE department_name = 'IT');
+
+-- 2. Get employees with salary over 5000, sorted by salary (high to low)
+SELECT first_name, last_name, salary 
+FROM employees
+WHERE salary > 5000
+ORDER BY salary DESC;
+
+-- 3. Show managers sorted by hire date
+SELECT first_name, last_name, hire_date 
+FROM employees
+WHERE employee_id IN (SELECT manager_id FROM employees)
+ORDER BY hire_date;
+
+-- 4. Show employees in Sales department with their job titles
+SELECT e.first_name, e.last_name, j.job_title 
+FROM employees e
+JOIN jobs j ON e.job_id = j.job_id
+JOIN departments d ON e.department_id = d.department_id
+WHERE d.department_name = 'Sales';
+
+-- 5. Find employees hired after January 1, 2010
+SELECT first_name, last_name, hire_date 
+FROM employees
+WHERE hire_date > TO_DATE('01-JAN-2010', 'DD-MON-YYYY')
+ORDER BY hire_date;
+
+-- 6. Total salary per department, sorted by amount
+SELECT d.department_name, SUM(e.salary) AS total_salary 
+FROM employees e
+JOIN departments d ON e.department_id = d.department_id
+GROUP BY d.department_name
+ORDER BY total_salary DESC;
+
+-- 7. Show employees reporting to manager with ID 102, sorted by salary
+SELECT first_name, last_name, salary 
+FROM employees
+WHERE manager_id = 102
+ORDER BY salary DESC;
+
+-- 8. Departments with more than 10 employees
+SELECT d.department_name, COUNT(e.employee_id) AS num_employees 
+FROM departments d
+JOIN employees e ON d.department_id = e.department_id
+GROUP BY d.department_name
+HAVING COUNT(e.employee_id) > 10
+ORDER BY num_employees DESC;
+
+-- 9. Show highest-paid employee in each department
+SELECT d.department_name, e.first_name, e.last_name, MAX(e.salary) AS highest_salary 
+FROM employees e
+JOIN departments d ON e.department_id = d.department_id
+GROUP BY d.department_name, e.first_name, e.last_name
+ORDER BY highest_salary DESC;
+
+-- 10. Employees with 'Manager' in their job title, sorted by salary (low to high)
+SELECT e.first_name, e.last_name, e.salary 
+FROM employees e
+JOIN jobs j ON e.job_id = j.job_id
+WHERE j.job_title LIKE '%Manager%'
+ORDER BY e.salary ASC;
